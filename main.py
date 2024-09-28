@@ -24,9 +24,10 @@ def main():
     if args.process:
         print("Processing and organizing code samples...")
         structured_samples = clean_and_deduplicate_samples()
-        organize_dataset()
+        organized_samples = organize_dataset()
         print("Code sample processing and organization completed.")
         print(f"Total number of structured samples: {len(structured_samples)}")
+        print(f"Total number of organized samples: {len(organized_samples)}")
 
     if args.fine_tune:
         print("Fine-tuning the model on full-stack and complex codebases...")

@@ -37,6 +37,15 @@ def preserve_directory_structure(samples):
         current_dict[parts[-1]] = sample
     return structured_samples
 
+def analyze_file_relationships(structured_samples):
+    for directory, contents in structured_samples.items():
+        if isinstance(contents, dict):
+            # This is a directory, analyze relationships between files
+            files = [f for f in contents.keys() if not isinstance(contents[f], dict)]
+            for file in files:
+                contents[file]['related_files'] = [f for f in files if f != file]
+            analyze_file_relationships(contents)
+
 def clean_and_deduplicate_samples():
     samples = get_all_code_samples()
     cleaned_samples = []
@@ -49,6 +58,7 @@ def clean_and_deduplicate_samples():
 
     deduplicated_samples = remove_duplicate_samples(cleaned_samples)
     structured_samples = preserve_directory_structure(deduplicated_samples)
+    analyze_file_relationships(structured_samples)
 
     for sample in deduplicated_samples:
         update_code_sample(sample)

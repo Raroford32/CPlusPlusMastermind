@@ -1,64 +1,58 @@
-import requests
-import base64
+import os
+import tempfile
+from git import Repo
+import shutil
 from config import GITHUB_API_TOKEN, GITHUB_REPOS, MAX_SAMPLES_PER_SOURCE
 from database.db_operations import insert_code_sample
 
-def get_repo_contents(repo, path=''):
-    headers = {'Authorization': f'token {GITHUB_API_TOKEN}'}
-    url = f'https://api.github.com/repos/{repo}/contents/{path}'
-    response = requests.get(url, headers=headers)
-    return response.json()
+def clone_repository(repo_url, temp_dir):
+    try:
+        Repo.clone_from(repo_url, temp_dir)
+        return True
+    except Exception as e:
+        print(f"Error cloning repository {repo_url}: {str(e)}")
+        return False
 
-def is_full_stack_repo(repo):
-    contents = get_repo_contents(repo)
-    has_frontend = any(item['name'].lower() in ['frontend', 'client', 'web'] for item in contents if item['type'] == 'dir')
-    has_backend = any(item['name'].lower() in ['backend', 'server', 'api'] for item in contents if item['type'] == 'dir')
-    return has_frontend and has_backend
-
-def get_file_content(repo, file_path):
-    headers = {'Authorization': f'token {GITHUB_API_TOKEN}'}
-    url = f'https://api.github.com/repos/{repo}/contents/{file_path}'
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        content = base64.b64decode(response.json()['content']).decode('utf-8')
-        return content
+def process_file(repo, file_path, temp_dir):
+    _, ext = os.path.splitext(file_path)
+    if ext.lower() in ['.py', '.js', '.html', '.css', '.cpp', '.h', '.sql', '.txt', '.md']:
+        with open(os.path.join(temp_dir, file_path), 'r', encoding='utf-8') as file:
+            content = file.read()
+        return {
+            'source': f'github/{repo}',
+            'filename': file_path,
+            'content': content,
+            'language': ext[1:],  # Remove the dot from the extension
+            'file_type': 'frontend' if ext.lower() in ['.js', '.html', '.css'] else 'backend'
+        }
     return None
 
+def process_directory(repo, directory, temp_dir):
+    samples = []
+    for root, _, files in os.walk(os.path.join(temp_dir, directory)):
+        for file in files:
+            file_path = os.path.relpath(os.path.join(root, file), temp_dir)
+            sample = process_file(repo, file_path, temp_dir)
+            if sample:
+                samples.append(sample)
+    return samples
+
 def get_github_code(repo):
-    if not is_full_stack_repo(repo):
-        print(f"{repo} is not a full-stack repository. Skipping.")
-        return []
+    with tempfile.TemporaryDirectory() as temp_dir:
+        repo_url = f"https://github.com/{repo}.git"
+        if not clone_repository(repo_url, temp_dir):
+            return []
 
-    code_samples = []
-    stack = [('', 'root')]
-
-    while stack and len(code_samples) < MAX_SAMPLES_PER_SOURCE:
-        current_path, current_type = stack.pop()
-        contents = get_repo_contents(repo, current_path)
-
-        for item in contents:
-            if item['type'] == 'dir':
-                stack.append((item['path'], 'dir'))
-            elif item['type'] == 'file':
-                _, ext = os.path.splitext(item['name'])
-                if ext.lower() in ['.py', '.js', '.html', '.css', '.cpp', '.h', '.sql']:
-                    content = get_file_content(repo, item['path'])
-                    if content:
-                        code_samples.append({
-                            'source': f'github/{repo}',
-                            'filename': item['path'],
-                            'content': content,
-                            'language': ext[1:],  # Remove the dot from the extension
-                            'file_type': 'frontend' if ext.lower() in ['.js', '.html', '.css'] else 'backend'
-                        })
-
-    return code_samples
+        return process_directory(repo, '', temp_dir)
 
 def scrape_github():
+    all_samples = []
     for repo in GITHUB_REPOS:
         samples = get_github_code(repo)
-        for sample in samples:
-            insert_code_sample(sample)
+        all_samples.extend(samples[:MAX_SAMPLES_PER_SOURCE])
+
+    for sample in all_samples:
+        insert_code_sample(sample)
 
 if __name__ == '__main__':
     scrape_github()

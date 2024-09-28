@@ -9,9 +9,9 @@ def insert_code_sample(sample):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO code_samples (source, filename, content, language, categories, complexity)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (sample['source'], sample['filename'], sample['content'], sample['language'], sample['categories'], sample['complexity']))
+                INSERT INTO code_samples (source, filename, content, language, file_type, categories, complexity)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (sample['source'], sample['filename'], sample['content'], sample['language'], sample['file_type'], sample['categories'], sample['complexity']))
 
 def get_all_code_samples():
     with get_connection() as conn:
@@ -64,3 +64,12 @@ def get_samples_for_fine_tuning(limit=1000):
                 LIMIT %s
             """, (limit,))
             return cur.fetchall()
+
+def get_project_structures():
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute("""
+                SELECT * FROM project_structures
+            """)
+            return {row['project_name']: dict(row) for row in cur.fetchall()}
+

@@ -1,19 +1,38 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM, Trainer, TrainingArguments, DataCollatorForLanguageModeling
 from datasets import Dataset
-from database.db_operations import get_samples_for_fine_tuning
+from database.db_operations import get_samples_for_fine_tuning, get_project_structures
 import torch
 
 def prepare_dataset():
     samples = get_samples_for_fine_tuning(limit=10000)  # Increased sample size
-    return Dataset.from_dict({
-        'content': [sample['content'] for sample in samples],
-        'language': [sample['language'] for sample in samples],
-        'complexity': [sample['complexity'] for sample in samples],
-        'categories': [','.join(sample['categories']) for sample in samples]
-    })
+    project_structures = get_project_structures()
+    
+    dataset = []
+    for sample in samples:
+        project_info = project_structures.get(sample['source'], {})
+        dataset.append({
+            'content': sample['content'],
+            'language': sample['language'],
+            'complexity': sample['complexity'],
+            'categories': ','.join(sample['categories']),
+            'file_type': sample['file_type'],
+            'filename': sample['filename'],
+            'build_system': project_info.get('build_system', ''),
+            'dependencies': ','.join(project_info.get('dependencies', [])),
+            'related_files': ','.join(sample.get('related_files', []))
+        })
+    
+    return Dataset.from_dict({k: [d[k] for d in dataset] for k in dataset[0].keys()})
 
 def tokenize_function(examples, tokenizer):
-    return tokenizer(examples['content'], padding='max_length', truncation=True, max_length=1024)  # Increased max_length
+    # Combine all fields into a single text
+    text = [f"Language: {lang}\nComplexity: {comp}\nCategories: {cat}\nFile Type: {ft}\nFilename: {fn}\nBuild System: {bs}\nDependencies: {dep}\nRelated Files: {rf}\n\nContent:\n{content}"
+            for lang, comp, cat, ft, fn, bs, dep, rf, content in zip(examples['language'], examples['complexity'], 
+                                                                     examples['categories'], examples['file_type'],
+                                                                     examples['filename'], examples['build_system'],
+                                                                     examples['dependencies'], examples['related_files'],
+                                                                     examples['content'])]
+    return tokenizer(text, padding='max_length', truncation=True, max_length=2048)  # Increased max_length
 
 def fine_tune_model():
     # Load a larger pre-trained model
@@ -29,13 +48,13 @@ def fine_tune_model():
     training_args = TrainingArguments(
         output_dir="./results",
         num_train_epochs=5,  # Increased number of epochs
-        per_device_train_batch_size=4,  # Reduced batch size to accommodate larger model
-        per_device_eval_batch_size=4,
+        per_device_train_batch_size=2,  # Reduced batch size to accommodate larger model and context
+        per_device_eval_batch_size=2,
         warmup_steps=500,
         weight_decay=0.01,
         logging_dir="./logs",
         fp16=True,  # Enable mixed precision training
-        gradient_accumulation_steps=4,  # Gradient accumulation for larger effective batch size
+        gradient_accumulation_steps=8,  # Increased gradient accumulation for larger effective batch size
         eval_steps=500,
         save_steps=1000,
         load_best_model_at_end=True,
