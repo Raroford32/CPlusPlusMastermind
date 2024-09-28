@@ -7,7 +7,7 @@ from data_processing.dataset_organizer import organize_dataset
 from model_fine_tuning.fine_tune import fine_tune_model
 
 def main():
-    parser = argparse.ArgumentParser(description="C++ and Python Dataset Creation and Model Fine-tuning")
+    parser = argparse.ArgumentParser(description="Full-stack C++ and Python Dataset Creation and Model Fine-tuning")
     parser.add_argument("--collect", action="store_true", help="Collect code samples")
     parser.add_argument("--process", action="store_true", help="Process and organize collected samples")
     parser.add_argument("--fine-tune", action="store_true", help="Fine-tune the model")
@@ -15,7 +15,7 @@ def main():
     args = parser.parse_args()
 
     if args.collect:
-        print("Collecting code samples...")
+        print("Collecting code samples from full-stack repositories and tutorials...")
         scrape_github()
         scrape_stackoverflow()
         scrape_websites()
@@ -23,12 +23,13 @@ def main():
 
     if args.process:
         print("Processing and organizing code samples...")
-        clean_and_deduplicate_samples()
+        structured_samples = clean_and_deduplicate_samples()
         organize_dataset()
         print("Code sample processing and organization completed.")
+        print(f"Total number of structured samples: {len(structured_samples)}")
 
     if args.fine_tune:
-        print("Fine-tuning the model...")
+        print("Fine-tuning the model on full-stack and complex codebases...")
         fine_tune_model()
         print("Model fine-tuning completed.")
 
