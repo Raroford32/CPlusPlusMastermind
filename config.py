@@ -15,31 +15,37 @@ GITHUB_API_TOKEN = 'your_github_api_token'
 # StackOverflow API configuration
 STACKOVERFLOW_API_KEY = 'your_stackoverflow_api_key'
 
-# List of popular C++ and Python repositories to scrape
+# List of popular C++ repositories to scrape
 GITHUB_REPOS = [
-    'tensorflow/tensorflow',
-    'pytorch/pytorch',
-    'scikit-learn/scikit-learn',
     'opencv/opencv',
-    'numpy/numpy',
-    'django/django',
-    'flask/flask',
-    'boost/boost',
+    'tensorflow/tensorflow',
+    'electron/electron',
+    'apple/swift',
+    'microsoft/terminal',
     'google/googletest',
+    'protocolbuffers/protobuf',
     'nlohmann/json',
+    'google/leveldb',
+    'facebook/rocksdb',
+    'apache/thrift',
+    'grpc/grpc',
+    'bitcoin/bitcoin',
+    'ethereum/solidity',
+    'BVLC/caffe'
 ]
 
 # List of websites to scrape for code samples
 WEBSITES = [
     'https://www.geeksforgeeks.org/c-plus-plus/',
-    'https://www.geeksforgeeks.org/python-programming-language/',
     'https://www.cplusplus.com/doc/tutorial/',
-    'https://docs.python.org/3/tutorial/',
+    'https://en.cppreference.com/w/cpp/language',
+    'https://www.learncpp.com/',
+    'https://www.codeproject.com/KB/cpp/'
 ]
 
 # Maximum number of code samples to collect per source
-MAX_SAMPLES_PER_SOURCE = 10000
+MAX_SAMPLES_PER_SOURCE = 1000
 
 # Minimum and maximum code sample lengths (in characters)
-MIN_SAMPLE_LENGTH = 50
-MAX_SAMPLE_LENGTH = 5000
+MIN_SAMPLE_LENGTH = 100
+MAX_SAMPLE_LENGTH = 10000

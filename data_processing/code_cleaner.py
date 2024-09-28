@@ -2,8 +2,11 @@ import re
 from database.db_operations import get_all_code_samples, update_code_sample
 
 def clean_code(code):
-    # Remove comments
-    code = re.sub(r'//.*?\n|/\*.*?\*/', '', code, flags=re.DOTALL)
+    # Remove single-line comments
+    code = re.sub(r'//.*?\n', '\n', code)
+    
+    # Remove multi-line comments
+    code = re.sub(r'/\*.*?\*/', '', code, flags=re.DOTALL)
     
     # Remove empty lines
     code = '\n'.join(line for line in code.splitlines() if line.strip())
@@ -27,7 +30,7 @@ def clean_and_deduplicate_samples():
 
     for sample in samples:
         cleaned_content = clean_code(sample['content'])
-        if len(cleaned_content) >= 50:  # Minimum length threshold
+        if len(cleaned_content) >= 100:  # Increased minimum length threshold
             sample['content'] = cleaned_content
             cleaned_samples.append(sample)
 
