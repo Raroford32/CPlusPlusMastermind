@@ -1,4 +1,8 @@
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Database configuration
 DB_CONFIG = {
@@ -10,10 +14,10 @@ DB_CONFIG = {
 }
 
 # GitHub API configuration
-GITHUB_API_TOKEN = 'your_github_api_token'
+GITHUB_API_TOKEN = os.environ.get('GITHUB_API_TOKEN')
 
 # StackOverflow API configuration
-STACKOVERFLOW_API_KEY = 'your_stackoverflow_api_key'
+STACKOVERFLOW_API_KEY = os.environ.get('STACKOVERFLOW_API_KEY')
 
 # List of popular C++ repositories to scrape
 GITHUB_REPOS = [

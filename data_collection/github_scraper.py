@@ -7,7 +7,7 @@ from database.db_operations import insert_code_sample
 
 def clone_repository(repo_url, temp_dir):
     try:
-        Repo.clone_from(repo_url, temp_dir)
+        Repo.clone_from(repo_url, temp_dir, env={'GIT_SSL_NO_VERIFY': '1', 'GIT_TERMINAL_PROMPT': '0'})
         return True
     except Exception as e:
         print(f"Error cloning repository {repo_url}: {str(e)}")

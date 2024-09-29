@@ -30,7 +30,8 @@ def get_stackoverflow_code(tag):
                     'source': f'stackoverflow/{question["question_id"]}',
                     'filename': f'stackoverflow_{question["question_id"]}.{tag}',
                     'content': code,
-                    'language': 'cpp' if tag == 'c++' else 'python'
+                    'language': 'cpp' if tag == 'c++' else 'python',
+                    'file_type': 'backend'  # Assuming most StackOverflow code is backend-related
                 })
 
         page += 1
