@@ -5,6 +5,7 @@ from data_collection.bitbucket_scraper import scrape_bitbucket
 from data_collection.sourceforge_scraper import scrape_sourceforge
 from data_collection.stackoverflow_scraper import scrape_stackoverflow
 from data_collection.website_scraper import scrape_websites
+from data_collection.kaggle_scraper import scrape_kaggle
 from data_processing.code_cleaner import clean_and_deduplicate_samples
 from data_processing.dataset_organizer import organize_dataset
 from model_fine_tuning.fine_tune import fine_tune_model
@@ -25,6 +26,7 @@ def main():
         scrape_sourceforge()
         scrape_stackoverflow()
         scrape_websites()
+        scrape_kaggle()
         print("Code sample collection completed.")
 
     if args.process:

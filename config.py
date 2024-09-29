@@ -26,6 +26,10 @@ BITBUCKET_APP_PASSWORD = os.environ.get('BITBUCKET_APP_PASSWORD')
 # StackOverflow API configuration
 STACKOVERFLOW_API_KEY = os.environ.get('STACKOVERFLOW_API_KEY')
 
+# Kaggle API configuration
+KAGGLE_USERNAME = os.environ.get('KAGGLE_USERNAME')
+KAGGLE_KEY = os.environ.get('KAGGLE_KEY')
+
 # List of popular C++ and Python repositories to scrape
 GITHUB_REPOS = [
     'opencv/opencv',
@@ -95,6 +99,14 @@ WEBSITES = [
     'https://en.cppreference.com/w/cpp/language',
     'https://www.learncpp.com/',
     'https://www.codeproject.com/KB/cpp/'
+]
+
+# List of Kaggle datasets or competitions to scrape
+KAGGLE_SOURCES = [
+    'rtatman/getting-started-in-r-markdown-markdown-crash-course',
+    'kerneler/starter-cpp-template',
+    'jsphyg/weather-dataset-rattle-package',
+    'rtatman/fun-beginner-friendly-datasets'
 ]
 
 # Maximum number of code samples to collect per source
