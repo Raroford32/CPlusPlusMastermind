@@ -1,5 +1,8 @@
 import argparse
 from data_collection.github_scraper import scrape_github
+from data_collection.gitlab_scraper import scrape_gitlab
+from data_collection.bitbucket_scraper import scrape_bitbucket
+from data_collection.sourceforge_scraper import scrape_sourceforge
 from data_collection.stackoverflow_scraper import scrape_stackoverflow
 from data_collection.website_scraper import scrape_websites
 from data_processing.code_cleaner import clean_and_deduplicate_samples
@@ -15,8 +18,11 @@ def main():
     args = parser.parse_args()
 
     if args.collect:
-        print("Collecting code samples from full-stack repositories and tutorials...")
+        print("Collecting code samples from various sources...")
         scrape_github()
+        scrape_gitlab()
+        scrape_bitbucket()
+        scrape_sourceforge()
         scrape_stackoverflow()
         scrape_websites()
         print("Code sample collection completed.")

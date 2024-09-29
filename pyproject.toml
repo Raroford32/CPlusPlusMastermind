@@ -15,4 +15,5 @@ dependencies = [
     "gitpython>=3.1.43",
     "torch",
     "python-dotenv>=1.0.1",
+    "beautifulsoup4>=4.12.3",
 ]

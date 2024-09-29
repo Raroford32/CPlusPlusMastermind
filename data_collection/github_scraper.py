@@ -2,7 +2,9 @@ import os
 import tempfile
 from git import Repo
 import shutil
-from config import GITHUB_API_TOKEN, GITHUB_REPOS, MAX_SAMPLES_PER_SOURCE
+import requests
+from bs4 import BeautifulSoup
+from config import GITHUB_API_TOKEN, GITHUB_REPOS, MAX_SAMPLES_PER_SOURCE, OFFICIAL_DOCS, PROGRAMMING_BOOKS, ACADEMIC_SOURCES
 from database.db_operations import insert_code_sample
 
 def clone_repository(repo_url, temp_dir):
@@ -45,11 +47,59 @@ def get_github_code(repo):
 
         return process_directory(repo, '', temp_dir)
 
+def get_official_docs_code(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    samples = []
+    
+    for code_block in soup.select('pre code'):
+        samples.append({
+            'source': f'official_docs/{url}',
+            'filename': f"official_docs_{len(samples)}.py",
+            'content': code_block.text,
+            'language': 'python',
+            'file_type': 'backend'
+        })
+    
+    return samples[:MAX_SAMPLES_PER_SOURCE]
+
+def get_programming_book_code(book_info):
+    return []
+
+def get_academic_source_code(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    samples = []
+    
+    for code_block in soup.select('pre code'):
+        samples.append({
+            'source': f'academic/{url}',
+            'filename': f"academic_{len(samples)}.py",
+            'content': code_block.text,
+            'language': 'python',
+            'file_type': 'backend'
+        })
+    
+    return samples[:MAX_SAMPLES_PER_SOURCE]
+
 def scrape_github():
     all_samples = []
+    
     for repo in GITHUB_REPOS:
         samples = get_github_code(repo)
         all_samples.extend(samples[:MAX_SAMPLES_PER_SOURCE])
+    
+    for doc_url in OFFICIAL_DOCS:
+        samples = get_official_docs_code(doc_url)
+        all_samples.extend(samples)
+    
+    for book in PROGRAMMING_BOOKS:
+        samples = get_programming_book_code(book)
+        all_samples.extend(samples)
+    
+    for source_url in ACADEMIC_SOURCES:
+        samples = get_academic_source_code(source_url)
+        all_samples.extend(samples)
 
     for sample in all_samples:
         insert_code_sample(sample)
