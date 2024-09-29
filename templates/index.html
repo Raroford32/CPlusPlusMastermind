@@ -11,44 +11,70 @@
 <body>
     <div class="container mt-5">
         <h1 class="mb-4">Code Sample Browser</h1>
-        <div class="row">
-            <div class="col-md-4">
-                <h2>Search Criteria</h2>
-                <form id="searchForm">
-                    <div class="mb-3">
-                        <label for="language" class="form-label">Language</label>
-                        <select id="language" class="form-select">
-                            <option value="">All</option>
-                            <option value="python">Python</option>
-                            <option value="cpp">C++</option>
-                        </select>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab" aria-controls="search" aria-selected="true">Search</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects" type="button" role="tab" aria-controls="projects" aria-selected="false">Projects</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="search" role="tabpanel" aria-labelledby="search-tab">
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <h2>Search Criteria</h2>
+                        <form id="searchForm">
+                            <div class="mb-3">
+                                <label for="language" class="form-label">Language</label>
+                                <select id="language" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="python">Python</option>
+                                    <option value="cpp">C++</option>
+                                    <option value="javascript">JavaScript</option>
+                                    <option value="java">Java</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="category" class="form-label">Category</label>
+                                <select id="category" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="object_oriented">Object-Oriented</option>
+                                    <option value="functional">Functional</option>
+                                    <option value="library_usage">Library Usage</option>
+                                    <option value="loops">Loops</option>
+                                    <option value="conditional">Conditional</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="complexity" class="form-label">Complexity</label>
+                                <select id="complexity" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="simple">Simple</option>
+                                    <option value="moderate">Moderate</option>
+                                    <option value="complex">Complex</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label for="category" class="form-label">Category</label>
-                        <select id="category" class="form-select">
-                            <option value="">All</option>
-                            <option value="object_oriented">Object-Oriented</option>
-                            <option value="functional">Functional</option>
-                            <option value="library_usage">Library Usage</option>
-                            <option value="loops">Loops</option>
-                            <option value="conditional">Conditional</option>
-                        </select>
+                    <div class="col-md-8">
+                        <h2>Results</h2>
+                        <div id="results"></div>
                     </div>
-                    <div class="mb-3">
-                        <label for="complexity" class="form-label">Complexity</label>
-                        <select id="complexity" class="form-select">
-                            <option value="">All</option>
-                            <option value="simple">Simple</option>
-                            <option value="moderate">Moderate</option>
-                            <option value="complex">Complex</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Search</button>
-                </form>
+                </div>
             </div>
-            <div class="col-md-8">
-                <h2>Results</h2>
-                <div id="results"></div>
+            <div class="tab-pane fade" id="projects" role="tabpanel" aria-labelledby="projects-tab">
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <h2>Projects</h2>
+                        <ul id="projectList" class="list-group"></ul>
+                    </div>
+                    <div class="col-md-8">
+                        <h2>Project Details</h2>
+                        <div id="projectDetails"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -81,6 +107,43 @@
                     }
                 });
             });
+
+            function loadProjects() {
+                $.ajax({
+                    url: '/projects',
+                    method: 'GET',
+                    success: function(data) {
+                        var projectListHtml = '';
+                        Object.keys(data).forEach(function(projectName) {
+                            projectListHtml += '<li class="list-group-item project-item" data-project-id="' + data[projectName].id + '">' + projectName + '</li>';
+                        });
+                        $('#projectList').html(projectListHtml);
+                    }
+                });
+            }
+
+            $(document).on('click', '.project-item', function() {
+                var projectId = $(this).data('project-id');
+                $.ajax({
+                    url: '/project/' + projectId,
+                    method: 'GET',
+                    success: function(data) {
+                        var projectDetailsHtml = '<h3>' + data.name + '</h3>';
+                        projectDetailsHtml += '<p><strong>Repository URL:</strong> ' + data.repository_url + '</p>';
+                        projectDetailsHtml += '<p><strong>Build System:</strong> ' + data.build_system + '</p>';
+                        projectDetailsHtml += '<p><strong>Dependencies:</strong> ' + data.dependencies.join(', ') + '</p>';
+                        projectDetailsHtml += '<h4>Files:</h4>';
+                        projectDetailsHtml += '<ul>';
+                        data.files.forEach(function(file) {
+                            projectDetailsHtml += '<li>' + file.filename + ' (' + file.language + ')</li>';
+                        });
+                        projectDetailsHtml += '</ul>';
+                        $('#projectDetails').html(projectDetailsHtml);
+                    }
+                });
+            });
+
+            loadProjects();
         });
     </script>
 </body>
