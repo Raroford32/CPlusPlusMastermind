@@ -18,8 +18,17 @@ def clone_repository(repo_url, temp_dir):
 def process_file(repo, file_path, temp_dir):
     _, ext = os.path.splitext(file_path)
     if ext.lower() in ['.py', '.js', '.html', '.css', '.cpp', '.h', '.sql', '.txt', '.md']:
-        with open(os.path.join(temp_dir, file_path), 'r', encoding='utf-8') as file:
-            content = file.read()
+        full_path = os.path.join(temp_dir, file_path)
+        try:
+            with open(full_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+        except UnicodeDecodeError:
+            try:
+                with open(full_path, 'r', encoding='latin-1') as file:
+                    content = file.read()
+            except Exception as e:
+                print(f"Error reading file {file_path}: {str(e)}")
+                return None
         return {
             'source': f'github/{repo}',
             'filename': file_path,
