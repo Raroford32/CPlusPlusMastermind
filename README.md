@@ -24,6 +24,13 @@ This project creates a comprehensive dataset of C++ and Python code samples from
 
 3. After running the setup script, edit the `.env` file with your actual API keys and database credentials.
 
+4. Initialize the database:
+   ```
+   python database/initialize_db.py
+   ```
+
+   This step creates all the necessary tables in the database.
+
 ## Running the Project
 
 To run the project, use the following commands:
