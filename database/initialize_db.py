@@ -11,6 +11,16 @@ def initialize_database():
     )
     cur = conn.cursor()
 
+    # Drop existing tables
+    cur.execute('''
+        DROP TABLE IF EXISTS file_relationships CASCADE;
+        DROP TABLE IF EXISTS project_files CASCADE;
+        DROP TABLE IF EXISTS code_samples CASCADE;
+        DROP TABLE IF EXISTS project_structures CASCADE;
+        DROP TABLE IF EXISTS projects CASCADE;
+    ''')
+
+    # Rest of the function remains the same
     with open('database/db_schema.sql', 'r') as schema_file:
         cur.execute(schema_file.read())
 
